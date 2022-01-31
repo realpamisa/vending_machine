@@ -1,11 +1,18 @@
 package model
 
 type User struct {
-	ID       int    `json:"id"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Deposit  int    `json:"deposit"`
-	Role     string `json:"role"`
+	ID       int      `json:"id"`
+	Username string   `json:"username"`
+	Password string   `json:"password"`
+	Deposit  int      `json:"deposit"`
+	Role     []string `json:"role"`
+}
+
+type RegisterInput struct {
+	Username string   `json:"username"`
+	Password string   `json:"password"`
+	Deposit  int      `json:"deposit"`
+	Role     []string `json:"role"`
 }
 
 type LoginVar struct {

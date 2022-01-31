@@ -13,10 +13,8 @@ var (
 	role  = "user"
 )
 
-func Register(user model.User) bool {
-	if user.Role != "admin" {
-		user.Role = role
-	}
+func Register(user model.RegisterInput) bool {
+
 	if !FindUserByUsername(user.Username) {
 		user.ID = len(users) + 1
 		users = append(users, user)
@@ -37,7 +35,6 @@ func Login(loginVar model.LoginVar) (*string, error) {
 		return validToken, nil
 	}
 	return nil, errors.New("invalid credentials")
-
 }
 
 func FindUserByUsername(username string) bool {
@@ -74,14 +71,9 @@ func PrettyPrint(i interface{}) string {
 
 func UpdateUser(username string, user model.User) bool {
 
-	for _, u := range users {
+	for i, u := range users {
 		if u.Username == username {
-			if user.Deposit != 0 {
-				u.Deposit = user.Deposit
-			}
-			if user.Username != "" {
-				u.Username = user.Username
-			}
+			users[i] = user
 			return true
 		}
 	}
@@ -92,7 +84,18 @@ func Deposit(username string, money int) bool {
 	if money == 5 || money == 10 || money == 20 || money == 50 || money == 100 {
 		for _, u := range users {
 			if u.Username == username {
-				u.Deposit = u.Deposit + money
+				newUser := model.User{
+					ID:       u.ID,
+					Username: u.Username,
+					Password: u.Password,
+					Deposit:  u.Deposit + money,
+					Role:     u.Role,
+				}
+				isSuccess := UpdateUser(username, newUser)
+
+				if !isSuccess {
+					return false
+				}
 				return true
 			}
 		}
@@ -104,7 +107,17 @@ func Deposit(username string, money int) bool {
 func ResetDeposit(username string) bool {
 	for _, u := range users {
 		if u.Username == username {
-			u.Deposit = 0
+			newUser := model.User{
+				ID:       u.ID,
+				Username: u.Username,
+				Password: u.Password,
+				Deposit:  0,
+				Role:     u.Role,
+			}
+			isSuccess := UpdateUser(username, newUser)
+			if !isSuccess {
+				return false
+			}
 			return true
 		}
 	}

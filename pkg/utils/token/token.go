@@ -10,13 +10,13 @@ import (
 var jwtKey = []byte("makodruglord")
 
 type Claims struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Role     string `json:"role"`
+	Username string    `json:"username"`
+	Password string    `json:"password"`
+	Role     []*string `json:"role"`
 	jwt.StandardClaims
 }
 
-func New(username, role string) (*string, error) {
+func New(username string, role []*string) (*string, error) {
 
 	expirationTime := time.Now().Add((24 * 30) * time.Hour)
 	// Create the JWT claims, which includes the username and expiry time
@@ -45,7 +45,13 @@ func Decode(bearerToken string) (*Claims, error) {
 	})
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		return &Claims{Username: fmt.Sprintf("%v", claims["username"]), Role: fmt.Sprintf("%v", claims["role"])}, err
+		//return &Claims{Email: fmt.Sprintf("%v", claims["email"]), Role: token.Claims.Role , Name: fmt.Sprintf("%v", claims["name"]), UserId: fmt.Sprintf("%v", claims["userId"])}, err
+		var roles []*string
+		for _, v := range claims["role"].([]interface{}) {
+			valStr := v.(string)
+			roles = append(roles, &valStr)
+		}
+		return &Claims{Username: fmt.Sprintf("%v", claims["username"]), Role: roles}, err
 	} else {
 		return nil, err
 	}

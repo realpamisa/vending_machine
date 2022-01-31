@@ -65,6 +65,9 @@ func AdminMiddleware() func(http.Handler) http.Handler {
 				response.ERROR(w, http.StatusBadRequest, err)
 				return
 			}
+			for _,u := range claims.Role{
+				if u.Role 
+			}
 			if claims.Role != "admin" {
 
 				w.Header().Set("Content-Type", "application/json")
