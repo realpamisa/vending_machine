@@ -1,18 +1,18 @@
 package model
 
 type User struct {
-	ID       int      `json:"id"`
-	Username string   `json:"username"`
-	Password string   `json:"password"`
-	Deposit  int      `json:"deposit"`
-	Role     []string `json:"role"`
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Deposit  int    `json:"deposit"`
+	Role     string `json:"role"`
 }
 
 type RegisterInput struct {
-	Username string   `json:"username"`
-	Password string   `json:"password"`
-	Deposit  int      `json:"deposit"`
-	Role     []string `json:"role"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Deposit  int    `json:"deposit"`
+	Role     string `json:"role"`
 }
 
 type LoginVar struct {
@@ -24,4 +24,11 @@ type Product struct {
 	ID           int    `json:"id"`
 	ProductName  string `json:"productName"`
 	ProductPrice int    `json:"productPrice"`
+	SellerId     int    `json:"sellerId"`
+}
+
+type Results struct {
+	TotalPrice       int    `json:"totalPrice"`
+	ProductPurchased string `json:"productPurchased"`
+	Change           []int  `json:"change"`
 }

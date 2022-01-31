@@ -16,8 +16,16 @@ var (
 func Register(user model.RegisterInput) bool {
 
 	if !FindUserByUsername(user.Username) {
-		user.ID = len(users) + 1
-		users = append(users, user)
+
+		id := len(users) + 1
+		newUser := model.User{
+			ID:       id,
+			Username: user.Username,
+			Password: user.Password,
+			Deposit:  user.Deposit,
+			Role:     user.Role,
+		}
+		users = append(users, newUser)
 		return true
 	}
 	return false
