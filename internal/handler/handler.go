@@ -17,19 +17,19 @@ func AdminOnly(w http.ResponseWriter, r *http.Request) {
 }
 
 func Register(w http.ResponseWriter, r *http.Request) {
-	var user model.User
+	var registerInput model.RegisterInput
 	values := r.URL.Query()
 	if values.Get("username") != "" {
-		user.Username = values.Get("username")
+		registerInput.Username = values.Get("username")
 	}
 	if values.Get("password") != "" {
-		user.Password = values.Get("password")
+		registerInput.Password = values.Get("password")
 	}
 	if values.Get("role") != "" {
-		user.Role = values.Get("role")
+		registerInput.Role = values.Get("role")
 	}
 
-	isSuccess := internal.Register(user)
+	isSuccess := internal.Register(registerInput)
 
 	if !isSuccess {
 		response.ERROR(w, http.StatusUnprocessableEntity, errors.New("Failed to create account"))
@@ -96,12 +96,17 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 			response.ERROR(w, http.StatusUnprocessableEntity, errors.New("Error parsing productPrice"))
 			return
 		}
-		productVar.ProductPrice = productPrice
+		productVar.ProductPrice = float32(productPrice)
 	}
 	if values.Get("productName") != "" {
 		productVar.ProductName = values.Get("productName")
 	}
-	isSuccess := internal.CreateProduct(productVar)
+	claims, err := middleware.GetClaims(r)
+	if err != nil {
+		response.ERROR(w, 400, err)
+		return
+	}
+	isSuccess := internal.CreateProduct(claims.UserID, productVar)
 
 	if !isSuccess {
 		response.ERROR(w, http.StatusUnprocessableEntity, errors.New("Failed to create product"))
@@ -131,7 +136,7 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			response.ERROR(w, http.StatusUnprocessableEntity, errors.New("Error parsing productPrice"))
 		}
-		productVar.ProductPrice = productPrice
+		productVar.ProductPrice = float32(productPrice)
 	}
 	if values.Get("productName") != "" {
 		productVar.ProductName = values.Get("productName")
@@ -196,9 +201,19 @@ func BuyProduct(w http.ResponseWriter, r *http.Request) {
 		response.ERROR(w, http.StatusUnprocessableEntity, errors.New("Error parsing claims"))
 		return
 	}
-	data := internal.BuyProduct(claims.Username, values.Get("productName"))
-	if !data {
-		response.ERROR(w, http.StatusUnprocessableEntity, errors.New("Error buying product"))
+	productId, err := strconv.Atoi(values.Get("productId"))
+	if err != nil {
+		response.ERROR(w, http.StatusUnprocessableEntity, errors.New("Error parsing deposit"))
+		return
+	}
+	amountOfProduct, err := strconv.Atoi(values.Get("amountOfProduct"))
+	if err != nil {
+		response.ERROR(w, http.StatusUnprocessableEntity, errors.New("Error parsing amountOfProduct"))
+		return
+	}
+	data, err := internal.BuyProduct(claims.Username, productId, float32(amountOfProduct))
+	if err != nil {
+		response.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 	response.JSON(w, 200, data)

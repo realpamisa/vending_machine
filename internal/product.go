@@ -1,12 +1,18 @@
 package internal
 
-import "github.com/realpamisa/model"
+import (
+	"errors"
+	"fmt"
+
+	"github.com/realpamisa/model"
+)
 
 var products []model.Product
 
-func CreateProduct(product model.Product) bool {
+func CreateProduct(sellerId string, product model.Product) bool {
 	if !FindProductByProductName(product.ProductName) {
 		product.ID = len(products) + 1
+		product.SellerId = sellerId
 		products = append(products, product)
 		return true
 	}
@@ -39,25 +45,67 @@ func UpdateProduct(productVar model.Product) bool {
 	return false
 }
 
-func GetProductByProductName(productName string) model.Product {
+func GetProductByID(productID int) model.Product {
 	for _, u := range products {
-		if u.ProductName == productName {
+		if u.ID == productID {
 			return u
 		}
 	}
 	return model.Product{}
 }
 
-func BuyProduct(username, productName string) bool {
+func BuyProduct(username string, productId int, amountOfProduct float32) (*model.Results, error) {
+	var (
+		hundreds = 0
+		fiftys   = 0
+		tens     = 0
+		twenties = 0
+		fives    = 0
+	)
 	userRaw := GetUserByUsername(username)
-	product := GetProductByProductName(productName)
-	if userRaw.Deposit >= product.ProductPrice {
-		userRaw.Deposit = userRaw.Deposit - product.ProductPrice
+	product := GetProductByID(productId)
+	total := product.ProductPrice * amountOfProduct
+	if userRaw.Deposit >= total {
+		userRaw.Deposit = userRaw.Deposit - total
+		change := userRaw.Deposit
 		isSuccessUpdate := UpdateUser(username, userRaw)
 		if !isSuccessUpdate {
-			return false
+			return nil, errors.New("Failed to update user")
 		}
-		return true
+		if change/100 > 1 {
+			hundreds = int(change) / 100
+			change = change - float32(hundreds)*100
+		}
+		if change/50 > 1 {
+			fiftys = int(change) / 50
+			change = change - float32(fiftys)*50
+		}
+		if change/50 > 1 {
+			fiftys = int(change) / 50
+			change = change - float32(fiftys)*50
+		}
+		if change/20 > 1 {
+			twenties = int(change) / 20
+			change = change - float32(twenties)*20
+		}
+		if change/10 > 1 {
+			tens = int(change) / 10
+			change = change - float32(tens)*10
+		}
+		if change/5 > 1 {
+			fives = int(change) / 5
+			change = change - float32(fives)*5
+		}
+		changeArr := []string{fmt.Sprintf("%d x 100", hundreds), fmt.Sprintf("%d x 50", fiftys), fmt.Sprintf("%d x 20", twenties), fmt.Sprintf("%d x 10", tens), fmt.Sprintf("%d x 5", fives)}
+
+		result := model.Results{
+			TotalPrice:       total,
+			ProductPurchased: product.ProductName,
+			Change:           changeArr,
+		}
+
+		return &result, nil
+
 	}
-	return false
+	return nil, errors.New("Not enough deposit money")
 }

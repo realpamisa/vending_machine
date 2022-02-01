@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -12,7 +11,6 @@ import (
 )
 
 var UserCtxKey = &contextKey{"userId"}
-var ipAddressKey = &contextKey{"ipAddress"}
 
 type contextKey struct {
 	name string
@@ -30,7 +28,6 @@ func Middleware() func(http.Handler) http.Handler {
 				return
 			}
 			reqToken = splitToken[1]
-			fmt.Println(reqToken)
 			claims, err := token.Decode(reqToken)
 			if err != nil {
 				w.Header().Set("Content-Type", "application/json")
@@ -47,7 +44,7 @@ func Middleware() func(http.Handler) http.Handler {
 		})
 	}
 }
-func AdminMiddleware() func(http.Handler) http.Handler {
+func SellerMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			reqToken := r.Header.Get("Authorization")
@@ -65,13 +62,10 @@ func AdminMiddleware() func(http.Handler) http.Handler {
 				response.ERROR(w, http.StatusBadRequest, err)
 				return
 			}
-			for _,u := range claims.Role{
-				if u.Role 
-			}
-			if claims.Role != "admin" {
+			if claims.Role != "seller" {
 
 				w.Header().Set("Content-Type", "application/json")
-				response.ERROR(w, http.StatusBadRequest, errors.New("Not admin"))
+				response.ERROR(w, http.StatusBadRequest, errors.New("Not seller"))
 				return
 			}
 
@@ -97,4 +91,14 @@ func GetClaims(r *http.Request) (*token.Claims, error) {
 		return nil, err
 	}
 	return claims, nil
+}
+
+// ForContext finds the user from the context. REQUIRES Middleware to have run.
+func GetUserCtx(ctx context.Context) (*token.Claims, error) {
+	raw, ok := ctx.Value(UserCtxKey).(*token.Claims)
+	if ok {
+		return raw, nil
+	}
+	return nil, errors.New("invalid token")
+
 }

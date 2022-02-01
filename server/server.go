@@ -31,8 +31,8 @@ func (srv Server) Start() {
 	// r.Use(requestMiddleWare.Middleware())
 	r.Get("/register", handler.Register)
 	r.Post("/login", handler.Login)
-	r.Mount("/admin", adminRouter())
-	r.Mount("/users", userRouter())
+	r.Mount("/seller", sellerRouter())
+	r.Mount("/buyer", buyerRouter())
 
 	err := http.ListenAndServe(":8080", r)
 	if err != nil {
@@ -40,10 +40,10 @@ func (srv Server) Start() {
 	}
 	return
 }
-func adminRouter() http.Handler {
+func sellerRouter() http.Handler {
 	r := chi.NewRouter()
-	r.Use(requestMiddleWare.AdminMiddleware())
-	r.Get("/", handler.AdminOnly)
+	r.Use(requestMiddleWare.SellerMiddleware())
+	r.Get("/", handler.GetUser)
 	r.Get("/users", handler.GetUsers)
 	r.Get("/product/create", handler.CreateProduct)
 	r.Get("/product/all", handler.ViewAllProducts)
@@ -52,7 +52,7 @@ func adminRouter() http.Handler {
 	return r
 }
 
-func userRouter() http.Handler {
+func buyerRouter() http.Handler {
 	r := chi.NewRouter()
 	r.Use(requestMiddleWare.Middleware())
 	r.Get("/", handler.GetUser)
