@@ -3,6 +3,7 @@ package internal
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/realpamisa/model"
 	"github.com/realpamisa/pkg/utils/token"
@@ -10,16 +11,17 @@ import (
 
 var (
 	users []model.User
-	role  = "user"
+	role  = "buyer"
 )
 
 func Register(user model.RegisterInput) bool {
-
+	if user.Role != "seller" {
+		user.Role = role
+	}
 	if !FindUserByUsername(user.Username) {
-
 		id := len(users) + 1
 		newUser := model.User{
-			ID:       id,
+			ID:       fmt.Sprint(id),
 			Username: user.Username,
 			Password: user.Password,
 			Deposit:  user.Deposit,
@@ -34,9 +36,8 @@ func Register(user model.RegisterInput) bool {
 func Login(loginVar model.LoginVar) (*string, error) {
 	user := GetUserByUsername(loginVar.Username)
 	if user.Password == loginVar.Password {
-
 		var validToken *string
-		validToken, err := token.New(user.Username, user.Role)
+		validToken, err := token.New(user.Username, user.Role, user.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -96,7 +97,7 @@ func Deposit(username string, money int) bool {
 					ID:       u.ID,
 					Username: u.Username,
 					Password: u.Password,
-					Deposit:  u.Deposit + money,
+					Deposit:  u.Deposit + float32(money),
 					Role:     u.Role,
 				}
 				isSuccess := UpdateUser(username, newUser)
