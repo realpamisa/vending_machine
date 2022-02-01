@@ -30,6 +30,7 @@ func Register(user model.RegisterInput) bool {
 		users = append(users, newUser)
 		return true
 	}
+
 	return false
 }
 
