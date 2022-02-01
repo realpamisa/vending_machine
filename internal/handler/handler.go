@@ -211,7 +211,7 @@ func BuyProduct(w http.ResponseWriter, r *http.Request) {
 		response.ERROR(w, http.StatusUnprocessableEntity, errors.New("Error parsing amountOfProduct"))
 		return
 	}
-	data, err := internal.BuyProduct(claims.Username, productId, float32(amountOfProduct))
+	data, err := internal.BuyProduct(claims.Username, productId, amountOfProduct)
 	if err != nil {
 		response.ERROR(w, http.StatusUnprocessableEntity, err)
 		return

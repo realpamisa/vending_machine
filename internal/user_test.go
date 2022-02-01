@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/realpamisa/model"
@@ -45,7 +46,7 @@ func TestCreate(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	validUsername := "pamisa123"
-	if !createUserTest(t) {
+	if !createUserTest(validUsername, t) {
 		t.Errorf("got unexpected err creating user test")
 	}
 	invalidUsername := "zxcczxczx"
@@ -85,7 +86,8 @@ func TestUpdate(t *testing.T) {
 }
 
 func TestViewUser(t *testing.T) {
-	if !createUserTest(t) {
+	validUsername := "pamisa123"
+	if !createUserTest(validUsername, t) {
 		t.Errorf("got unexpected err creating user test")
 	}
 
@@ -95,11 +97,12 @@ func TestViewUser(t *testing.T) {
 	}
 }
 
-func createUserTest(t *testing.T) bool {
+func createUserTest(username string, t *testing.T) bool {
 	validRequest := model.RegisterInput{
-		Username: "pamisa123",
+		Username: username,
 		Password: "123123",
 		Role:     "buyer",
+		Deposit:  100,
 	}
 	isSuccess := Register(validRequest)
 	return isSuccess
@@ -107,7 +110,7 @@ func createUserTest(t *testing.T) bool {
 
 func TestDeposit(t *testing.T) {
 	validUsername := "pamisa123"
-	if !createUserTest(t) {
+	if !createUserTest(validUsername, t) {
 		t.Errorf("got unexpected err creating user test")
 	}
 	validRequest := model.User{
@@ -144,4 +147,91 @@ func TestDeposit(t *testing.T) {
 		})
 	}
 
+}
+
+type BuyProductTest struct {
+	Username        string
+	ProductID       int
+	AmountOfProduct int
+}
+
+func TestBuy(t *testing.T) {
+	validUsername := "pamisa123"
+	if !createUserTest(validUsername, t) {
+		t.Errorf("got unexpected err creating user test")
+	}
+	validDepositRequest := model.User{
+		Deposit: 100,
+	}
+	if !UpdateUser(validUsername, validDepositRequest) {
+		t.Errorf("got unexpected err updating deposit money")
+	}
+	if !createProductTest(validUsername, t) {
+		t.Errorf("got unexpected err creating product test")
+
+	}
+	validRequest := BuyProductTest{
+		Username:        validUsername,
+		ProductID:       1,
+		AmountOfProduct: 2,
+	}
+	// invalidAmountOfMoney := BuyProductTest{
+	// 	Username:        validUsername,
+	// 	ProductID:       1,
+	// 	AmountOfProduct: 10,
+	// }
+	invalidUsername := BuyProductTest{
+		Username:        "invalid",
+		ProductID:       1,
+		AmountOfProduct: 2,
+	}
+	tests := []struct {
+		Name              string
+		Request           BuyProductTest
+		ExpectedErrString string
+	}{
+		{
+			Name:              "ValidDeposit",
+			Request:           validRequest,
+			ExpectedErrString: "",
+		},
+		// {
+		// 	Name:              "InvalidAmountOfMoney",
+		// 	Request:           invalidAmountOfMoney,
+		// 	ExpectedErrString: "Not enough deposit money",
+		// },
+		{
+			Name:              "invalidUsername",
+			Request:           invalidUsername,
+			ExpectedErrString: "Invalid Username",
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			_, err := BuyProduct(tc.Request.Username, tc.Request.ProductID, tc.Request.AmountOfProduct)
+			if tc.ExpectedErrString != "" && err != nil && !strings.Contains(err.Error(), tc.ExpectedErrString) {
+				t.Errorf("got unexpected err - got: %v , wanted: %v", err, tc.ExpectedErrString)
+			}
+		})
+	}
+
+}
+
+func createProductTest(username string, t *testing.T) bool {
+	validRequest := model.Product{
+		ProductName:  "mako",
+		ProductPrice: 20,
+	}
+	isSuccess := CreateProduct(username, validRequest)
+	return isSuccess
+}
+
+func createUserSellerTest(t *testing.T) bool {
+	validRequest := model.RegisterInput{
+		Username: "pamisa1234",
+		Password: "123123",
+		Role:     "seller",
+	}
+	isSuccess := Register(validRequest)
+	return isSuccess
 }

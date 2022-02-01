@@ -34,7 +34,10 @@ func Register(user model.RegisterInput) bool {
 }
 
 func Login(loginVar model.LoginVar) (*string, error) {
-	user := GetUserByUsername(loginVar.Username)
+	user, err := GetUserByUsername(loginVar.Username)
+	if err != nil {
+		return nil, err
+	}
 	if user.Password == loginVar.Password {
 		var validToken *string
 		validToken, err := token.New(user.Username, user.Role, user.ID)
@@ -58,15 +61,15 @@ func FindUserByUsername(username string) bool {
 	return false
 }
 
-func GetUserByUsername(username string) model.User {
+func GetUserByUsername(username string) (model.User, error) {
 	if len(users) > 0 {
 		for _, u := range users {
 			if u.Username == username {
-				return u
+				return u, nil
 			}
 		}
 	}
-	return model.User{}
+	return model.User{}, errors.New("Invalid Username")
 }
 
 func GetAllUsers() []model.User {

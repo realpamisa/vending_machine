@@ -54,7 +54,7 @@ func GetProductByID(productID int) model.Product {
 	return model.Product{}
 }
 
-func BuyProduct(username string, productId int, amountOfProduct float32) (*model.Results, error) {
+func BuyProduct(username string, productId int, amountOfProduct int) (*model.Results, error) {
 	var (
 		hundreds = 0
 		fiftys   = 0
@@ -62,9 +62,12 @@ func BuyProduct(username string, productId int, amountOfProduct float32) (*model
 		twenties = 0
 		fives    = 0
 	)
-	userRaw := GetUserByUsername(username)
+	userRaw, err := GetUserByUsername(username)
+	if err != nil {
+		return nil, err
+	}
 	product := GetProductByID(productId)
-	total := product.ProductPrice * amountOfProduct
+	total := product.ProductPrice * float32(amountOfProduct)
 	if userRaw.Deposit >= total {
 		userRaw.Deposit = userRaw.Deposit - total
 		change := userRaw.Deposit
