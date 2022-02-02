@@ -145,6 +145,43 @@ func TestDeposit(t *testing.T) {
 
 }
 
+func TestDeleteProduct(t *testing.T) {
+	validUsername := "pamisa123456789"
+	if !createUserTest(validUsername, t) {
+		t.Errorf("got unexpected err creating user test")
+	}
+	if !createProductTest(validUsername, t) {
+		t.Errorf("got unexpected err creating product test")
+	}
+	validRequest := "1"
+	invalidRequest := "2"
+	tests := []struct {
+		Name              string
+		Request           string
+		ExpectedErrorBool bool
+	}{
+		{
+			Name:              "ValidDeleteProduct",
+			Request:           validRequest,
+			ExpectedErrorBool: true,
+		},
+		{
+			Name:              "InvalidDeleteProduct",
+			Request:           invalidRequest,
+			ExpectedErrorBool: false,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			isSuccess := DeleteProduct(tc.Request)
+			if isSuccess != tc.ExpectedErrorBool {
+				t.Errorf("got unexpected err - got: %v , wanted: %v", isSuccess, tc.ExpectedErrorBool)
+			}
+		})
+	}
+
+}
+
 type BuyProductTest struct {
 	Username        string
 	ProductID       int

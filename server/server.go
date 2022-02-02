@@ -56,6 +56,7 @@ func sellerRouter() http.Handler {
 	r.Get("/product/create", handler.CreateProduct)
 	r.Get("/product/all", handler.ViewAllProducts)
 	r.Get("/product/update", handler.UpdateProduct)
+	r.Get("/product/delete", handler.DeleteProduct)
 	// r.Get("/accounts", adminListAccounts)
 	return r
 }

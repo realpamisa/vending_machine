@@ -112,3 +112,13 @@ func BuyProduct(username string, productId int, amountOfProduct int) (*model.Res
 	}
 	return nil, errors.New("Not enough deposit money")
 }
+
+func DeleteProduct(id string) bool {
+	for i, u := range users {
+		if u.ID == id {
+			users = append(users[:i], users[i+1:]...)
+			return true
+		}
+	}
+	return false
+}

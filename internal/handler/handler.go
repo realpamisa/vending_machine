@@ -64,7 +64,12 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		response.ERROR(w, 400, err)
 		return
 	}
-	isSuccess := internal.Logout(claims.Username)
+	if !internal.Logout(claims.Username) {
+		response.ERROR(w, 400, err)
+		return
+	}
+	response.JSON(w, 200, true)
+	return
 }
 
 func GetUsers(w http.ResponseWriter, r *http.Request) {
@@ -160,6 +165,14 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	response.JSON(w, 200, true)
 	return
+}
+
+func DeleteProduct(w http.ResponseWriter, r *http.Request) {
+	values := r.URL.Query()
+
+	if !internal.DeleteProduct(values.Get("productId")) {
+		response.ERROR(w, http.StatusUnprocessableEntity, errors.New("Error delete user"))
+	}
 }
 
 func Deposit(w http.ResponseWriter, r *http.Request) {
