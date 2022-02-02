@@ -33,6 +33,7 @@ func (srv Server) Start() {
 	r.Post("/login", handler.Login)
 	r.Mount("/seller", sellerRouter())
 	r.Mount("/buyer", buyerRouter())
+	r.Mount("/logout", logoutRouter())
 
 	err := http.ListenAndServe(":8080", r)
 	if err != nil {
@@ -40,6 +41,13 @@ func (srv Server) Start() {
 	}
 	return
 }
+
+func logoutRouter() http.Handler {
+	r := chi.NewRouter()
+	r.Use(requestMiddleWare.SellerMiddleware())
+	r.Get("/", handler.Logout)
+}
+
 func sellerRouter() http.Handler {
 	r := chi.NewRouter()
 	r.Use(requestMiddleWare.SellerMiddleware())

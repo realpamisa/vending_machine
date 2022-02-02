@@ -26,6 +26,7 @@ func Register(user model.RegisterInput) bool {
 			Password: user.Password,
 			Deposit:  user.Deposit,
 			Role:     user.Role,
+			IsLogin:  false,
 		}
 		users = append(users, newUser)
 		return true
@@ -45,9 +46,25 @@ func Login(loginVar model.LoginVar) (*string, error) {
 		if err != nil {
 			return nil, err
 		}
+		user.IsLogin = true
+		if !UpdateUser(loginVar.Username, user) {
+			return nil, errors.New("Failed to update isLogin")
+		}
 		return validToken, nil
 	}
 	return nil, errors.New("invalid credentials")
+}
+
+func Logout(username string) bool {
+	user, err := GetUserByUsername(username)
+	if err != nil {
+		return false
+	}
+	user.IsLogin = false
+	if !UpdateUser(username, user) {
+		return false
+	}
+	return true
 }
 
 func FindUserByUsername(username string) bool {

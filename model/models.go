@@ -6,6 +6,7 @@ type User struct {
 	Password string  `json:"password"`
 	Deposit  float32 `json:"deposit"`
 	Role     string  `json:"role"`
+	IsLogin  bool
 }
 
 type RegisterInput struct {

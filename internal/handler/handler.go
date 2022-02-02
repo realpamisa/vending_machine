@@ -12,10 +12,6 @@ import (
 	"github.com/realpamisa/server/response"
 )
 
-func AdminOnly(w http.ResponseWriter, r *http.Request) {
-	response.JSON(w, http.StatusCreated, true)
-}
-
 func Register(w http.ResponseWriter, r *http.Request) {
 	var registerInput model.RegisterInput
 	values := r.URL.Query()
@@ -62,6 +58,15 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func Logout(w http.ResponseWriter, r *http.Request) {
+	claims, err := middleware.GetClaims(r)
+	if err != nil {
+		response.ERROR(w, 400, err)
+		return
+	}
+	isSuccess := internal.Logout(claims.Username)
+}
+
 func GetUsers(w http.ResponseWriter, r *http.Request) {
 	data := internal.GetAllUsers()
 	if len(data) != 0 {
@@ -77,7 +82,11 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 		response.ERROR(w, 400, err)
 		return
 	}
-	data := internal.GetUserByUsername(claims.Username)
+	data, err := internal.GetUserByUsername(claims.Username)
+	if err != nil {
+		response.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
 	response.JSON(w, 200, data)
 	return
 }
