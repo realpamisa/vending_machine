@@ -39,13 +39,15 @@ func (srv Server) Start() {
 	if err != nil {
 		panic(err)
 	}
-	return
+	return 
 }
 
 func logoutRouter() http.Handler {
 	r := chi.NewRouter()
 	r.Use(requestMiddleWare.SellerMiddleware())
 	r.Get("/", handler.Logout)
+	return r
+
 }
 
 func sellerRouter() http.Handler {

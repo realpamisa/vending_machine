@@ -34,9 +34,9 @@ func ViewAllProducts() []model.Product {
 	return products
 }
 
-func UpdateProduct(productVar model.Product) bool {
+func UpdateProduct(id int, productVar model.Product) bool {
 	for _, p := range products {
-		if p.ID == productVar.ID {
+		if p.ID == id {
 			p.ProductName = productVar.ProductName
 			p.ProductPrice = productVar.ProductPrice
 			return true
@@ -75,27 +75,27 @@ func BuyProduct(username string, productId int, amountOfProduct int) (*model.Res
 		if !isSuccessUpdate {
 			return nil, errors.New("Failed to update user")
 		}
-		if change/100 > 1 {
+		if change/100 >= 1 {
 			hundreds = int(change) / 100
 			change = change - float32(hundreds)*100
 		}
-		if change/50 > 1 {
+		if change/50 >= 1 {
 			fiftys = int(change) / 50
 			change = change - float32(fiftys)*50
 		}
-		if change/50 > 1 {
+		if change/50 >= 1 {
 			fiftys = int(change) / 50
 			change = change - float32(fiftys)*50
 		}
-		if change/20 > 1 {
+		if change/20 >= 1 {
 			twenties = int(change) / 20
 			change = change - float32(twenties)*20
 		}
-		if change/10 > 1 {
+		if change/10 >= 1 {
 			tens = int(change) / 10
 			change = change - float32(tens)*10
 		}
-		if change/5 > 1 {
+		if change/5 >= 1 {
 			fives = int(change) / 5
 			change = change - float32(fives)*5
 		}
